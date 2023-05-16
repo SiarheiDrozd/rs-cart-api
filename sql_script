@@ -1,0 +1,29 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE TYPE public.status_enum AS ENUM
+    ('OPEN', 'ORDERED');
+
+CREATE TABLE public.carts (
+	id uuid not null default uuid_generate_v4() primary key,
+	user_id uuid NOT null default uuid_generate_v4(),
+	created_at date NOT null,
+	updated_at date NOT NULL,
+	status status_enum not NULL
+);
+
+CREATE TABLE public.cart_items (
+	cart_id uuid NULL,
+	product_id uuid NULL,
+	count integer NOT NULL
+);
+
+
+insert into public.carts (created_at, updated_at, status) values (
+'2023-01-01 20:00:00',
+'2023-01-01 20:00:00',
+'OPEN')
+
+insert into public.cart_items (cart_id, product_id, count) values (
+uuid_generate_v4(),
+uuid_generate_v4(),
+random()*100)
