@@ -8,6 +8,9 @@ plugins:
 provider:
   name: aws
   runtime: nodejs18.x
+  environment:
+    dbPassword: 'admin_rds'
+    dbLogin: 'admin_rds'
 
 functions:
   main:

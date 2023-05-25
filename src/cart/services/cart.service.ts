@@ -3,29 +3,48 @@ import { Injectable } from '@nestjs/common';
 import { v4 } from 'uuid';
 
 import { Cart } from '../models';
+import {DBConnectionService} from "../../shared/services/index";
 
 @Injectable()
 export class CartService {
   private userCarts: Record<string, Cart> = {};
 
-  findByUserId(userId: string): Cart {
-    return this.userCarts[ userId ];
-  }
+  constructor(private dbService: DBConnectionService) {}
 
-  createByUserId(userId: string) {
+  async findByUserId(userId: string): Promise<any> {
+    let items = await this.dbService.runQuery(`
+      SELECT * FROM cart_items WHERE cart_id IN (SELECT id FROM carts WHERE user_id='${userId}')
+    `);
+
+    items = items.map(item => {
+      return {
+        product: {
+          price: 1
+        },
+        ...item
+      }
+    })
+    console.log(items);
+    return {
+      id: items[0].cart_id,
+      items: items
+    }
+  }
+  async createByUserId(userId: string) {
+
     const id = v4(v4());
     const userCart = {
       id,
       items: [],
     };
 
-    this.userCarts[ userId ] = userCart;
+    return await this.dbService.runQuery(``).then()
 
     return userCart;
   }
 
-  findOrCreateByUserId(userId: string): Cart {
-    const userCart = this.findByUserId(userId);
+  async findOrCreateByUserId(userId: string): Promise<Cart> {
+    const userCart = await this.findByUserId(userId);
 
     if (userCart) {
       return userCart;
@@ -34,8 +53,8 @@ export class CartService {
     return this.createByUserId(userId);
   }
 
-  updateByUserId(userId: string, { items }: Cart): Cart {
-    const { id, ...rest } = this.findOrCreateByUserId(userId);
+  async updateByUserId(userId: string, { items }: Cart): Promise<Cart> {
+    const { id, ...rest } = await this.findOrCreateByUserId(userId);
 
     const updatedCart = {
       id,
