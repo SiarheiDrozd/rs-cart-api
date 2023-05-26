@@ -1,0 +1,24 @@
+org: drozdsi
+app: aws-be
+service: nestjs-service
+
+plugins:
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  environment:
+    dbPassword: 'admin_rds'
+    dbLogin: 'admin_rds'
+
+functions:
+  main:
+    handler: dist/main.handler
+    events:
+      - http:
+          method: ANY
+          path: /
+      - http:
+          method: ANY
+          path: '{proxy+}'
