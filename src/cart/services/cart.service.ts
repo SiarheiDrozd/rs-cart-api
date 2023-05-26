@@ -12,40 +12,39 @@ export class CartService {
   constructor(private dbService: DBConnectionService) {}
 
   async findByUserId(userId: string): Promise<any> {
-    let items = await this.dbService.runQuery(`
+    console.log(userId);
+
+    const cartItems = await this.dbService.runQuery(`
       SELECT * FROM cart_items WHERE cart_id IN (SELECT id FROM carts WHERE user_id='${userId}')
     `);
 
-    items = items.map(item => {
-      return {
-        product: {
-          price: 1
-        },
-        ...item
-      }
-    })
-    console.log(items);
-    return {
-      id: items[0].cart_id,
-      items: items
-    }
+    console.log(cartItems);
+
+    return cartItems
   }
   async createByUserId(userId: string) {
-
+    console.log("createByUserId");
     const id = v4(v4());
-    const userCart = {
-      id,
-      items: [],
-    };
+    const timeStamp = new Date();
 
-    return await this.dbService.runQuery(``).then()
-
-    return userCart;
+    return await this.dbService.runQuery(`
+      insert into carts (id, user_id, created_at, updated_at, status, items) values (
+        '${id}',
+        '${userId},'
+        '${timeStamp}',
+        '${timeStamp}',
+        'OPEN',
+        [])
+      `).then((data) => {
+      return data
+    })
   }
 
   async findOrCreateByUserId(userId: string): Promise<Cart> {
-    const userCart = await this.findByUserId(userId);
+    userId = userId || '46825150-0df4-4ed4-8a73-94dd77de71be';
 
+    const userCart = await this.findByUserId(userId);
+    console.log('userCart', userCart);
     if (userCart) {
       return userCart;
     }
@@ -54,21 +53,21 @@ export class CartService {
   }
 
   async updateByUserId(userId: string, { items }: Cart): Promise<Cart> {
-    const { id, ...rest } = await this.findOrCreateByUserId(userId);
+    const { id} = await this.findOrCreateByUserId(userId);
+    const timeStamp = new Date();
 
-    const updatedCart = {
-      id,
-      ...rest,
-      items: [ ...items ],
-    }
-
-    this.userCarts[ userId ] = { ...updatedCart };
-
-    return { ...updatedCart };
+    return await this.dbService.runQuery(`
+      UPDATE carts 
+      SET id = ${id}, updated_at = '${timeStamp}', status = 'OPEN', items = ${[...items]})
+      WHERE user_id = '${userId}'
+      `).then((data) => {
+      return data
+    });
   }
 
   removeByUserId(userId): void {
-    this.userCarts[ userId ] = null;
+    this.dbService.runQuery(`DELETE FROM carts WHERE id = ${userId}`).then(result => {
+      console.log(result);
+    })
   }
-
 }

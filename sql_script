@@ -4,26 +4,48 @@ CREATE TYPE public.status_enum AS ENUM
     ('OPEN', 'ORDERED');
 
 CREATE TABLE public.carts (
-	id uuid not null default uuid_generate_v4() primary key,
-	user_id uuid NOT null default uuid_generate_v4(),
-	created_at date NOT null,
+	id uuid NOT NULL DEFAULT uuid_generate_v4() PRIMARY key,
+	user_id uuid NOT NULL DEFAULT uuid_generate_v4(),
+	created_at date NOT NULL,
 	updated_at date NOT NULL,
-	status status_enum not NULL
+	status status_enum NOT NULL
 );
 
 CREATE TABLE public.cart_items (
 	cart_id uuid NULL,
 	product_id uuid NULL,
-	count integer NOT NULL
+	count integer NOT NULL,
+	FOREIGN KEY (cart_id) REFERENCES public.carts(id)
 );
 
+CREATE TABLE public.products (
+	id uuid not null DEFAULT uuid_generate_v4() primary key,
+	title text not null,
+	description text default 'description',
+	price integer NOT null
+);
 
-insert into public.carts (created_at, updated_at, status) values (
-'2023-01-01 20:00:00',
-'2023-01-01 20:00:00',
-'OPEN')
+insert into public.products (title, description, price) values (
+'T-shirt 1',
+'clothes',
+55);
 
-insert into public.cart_items (cart_id, product_id, count) values (
-uuid_generate_v4(),
-uuid_generate_v4(),
-random()*100)
+insert into public.products (title, description, price) values (
+'T-shirt 1',
+'clothes',
+55);
+
+insert into public.products (title, description, price) values (
+'T-shirt 2',
+'clothes',
+40);
+
+insert into public.products (title, description, price) values (
+'T-shirt 3',
+'clothes',
+35);
+
+insert into public.products (title, description, price) values (
+'T-shirt 4',
+'clothes',
+52);
